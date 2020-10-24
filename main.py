@@ -71,8 +71,10 @@ def register():
 
 @socketio.on('message')
 def handleMessage(usr,msg): 
-    print(msg)
+    
     insert_message(session["user"],msg)
+    msg = str(session["user"]+" : "+msg)
+    print(msg)
     send(msg, broadcast=True)
 
 

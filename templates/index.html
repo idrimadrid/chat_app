@@ -3,13 +3,16 @@
 <title>Chat Room</title>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/bootstrap.min.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/jquery.validate/jquery.validate.css') }}"
+          type="text/css"/>
 </head>
 <body>
 <script type="text/javascript">
 $(document).ready(function() {
     var socket = io.connect('http://127.0.0.1:5000');
     socket.on('message', function(msg) {
-        $('#messages').append('<li>'+$('#user').val()+' : '+msg+'</li>');
+        $('#messages').append('<li>'+msg+'</li>');
         console.log('Received message');
     });
     $('#sendbutton').on('click', function() {
@@ -19,7 +22,8 @@ $(document).ready(function() {
 });
 </script>
 <h1> Welcome <div id="user">{{user}}</div></h1>
-<a href="/logout" class="text-info">Logout</a>
+<div style="text-align: right;margin-right: 2cm;">
+<a href="/logout"  class="text-info">Logout</a></div>
 <ul id="messages" style="list-style: none;">
 
     {% for msg in messages %}
@@ -28,7 +32,9 @@ $(document).ready(function() {
         
     {% endfor %}
 </ul>
+<div style="text-align: center">
 <input type="text" id="myMessage" placeholder="Message">
 <button id="sendbutton">Send</button>
+</div>
 </body>
 </html>
