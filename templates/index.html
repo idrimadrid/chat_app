@@ -6,8 +6,27 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/bootstrap.min.css') }}" type="text/css"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='plugins/jquery.validate/jquery.validate.css') }}"
           type="text/css"/>
+<style>
+h1 {
+    color: aliceblue;
+    margin-left: 1cm;
+    margin-top: 1cm;
+    margin-bottom: 1cm;
+    }
+#logout {
+    margin-top: 2em;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: beige;
+}
+li{
+    font-weight: bold;
+}
+</style>
 </head>
-<body>
+<body style="background-color: #878787;">
 <script type="text/javascript">
 $(document).ready(function() {
     var socket = io.connect('http://127.0.0.1:5000');
@@ -21,17 +40,27 @@ $(document).ready(function() {
     });
 });
 </script>
-<h1> Welcome <div id="user">{{user}}</div></h1>
-<div style="text-align: right;margin-right: 2cm;">
+<h1 style="text-align: center;"> CHAT ROOM</h1>
+<h1> Welcome, <strong id="user">{{user}}</strong></h1>
+<div id="logout" style="text-align: right;margin-right: 2cm;">
 <a href="/logout"  class="text-info">Logout</a></div>
+<div style="margin-bottom: 1cm;margin-left: 3cm;margin-right: 3cm;opacity: 0.5;background-color: beige;padding: 1em;">
 <ul id="messages" style="list-style: none;">
 
     {% for msg in messages %}
 
-        <li>{{ msg[0]+': '+msg[1] }}</li>
+    {% if msg[0]==user %}
+
+    <li style="text-align: right;">{{ msg[0]+': '+msg[1] }}</li>
+
+    {% else %}
+
+    <li>{{ msg[0]+': '+msg[1] }}</li>
+
+    {% endif %}
         
     {% endfor %}
-</ul>
+</ul></div>
 <div style="text-align: center">
 <input type="text" id="myMessage" placeholder="Message">
 <button id="sendbutton">Send</button>

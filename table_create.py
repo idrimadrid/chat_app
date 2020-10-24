@@ -2,7 +2,7 @@ import psycopg2
 
 
 def main():
-    conn = psycopg2.connect("host='localhost' dbname='chat_db' user='postgres' password='admin'")
+    conn = psycopg2.connect("host='ec2-52-72-34-184.compute-1.amazonaws.com' port='5432' dbname='dcqsqk92pdhf6o' user='ugpndzjemldrwf' password='5f52b1ba3113ab3af88a8124423e664a3559fbe43b5b071acd88f430e12b8b0f'")
     cursor = conn.cursor()
 
     TABLES = {}
