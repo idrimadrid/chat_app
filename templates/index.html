@@ -9,21 +9,25 @@
 $(document).ready(function() {
     var socket = io.connect('http://127.0.0.1:5000');
     socket.on('message', function(msg) {
-        $("#messages").append('<li>'+msg+'</li>');
+        $('#messages').append('<li>'+$('#user').val()+' : '+msg+'</li>');
         console.log('Received message');
     });
     $('#sendbutton').on('click', function() {
-        socket.send($('#myName').val(), $('#myMessage').val());
+        socket.send($('#user').val(), $('#myMessage').val());
         $('#myMessage').val('');
     });
 });
 </script>
+<h1> Welcome <div id="user">{{user}}</div></h1>
+<a href="/logout" class="text-info">Logout</a>
 <ul id="messages" style="list-style: none;">
+
     {% for msg in messages %}
-        <li>{{ ': '+msg.message }}</li>
+
+        <li>{{ msg[0]+': '+msg[1] }}</li>
+        
     {% endfor %}
 </ul>
-<input type="text" id="myName" placeholder="Username">
 <input type="text" id="myMessage" placeholder="Message">
 <button id="sendbutton">Send</button>
 </body>

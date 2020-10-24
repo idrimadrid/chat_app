@@ -1,44 +1,89 @@
-from flask import Flask, render_template, redirect, url_for
-from flask_socketio import SocketIO
+from flask import Flask, render_template, redirect, url_for,session,request
+from flask_socketio import SocketIO, send
 import psycopg2
+from datetime import datetime
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-socketio = SocketIO(app)
-connection = psycopg2.connect("host='localhost' dbname='movie_db' user='postgres' password='admin'")
+connection = psycopg2.connect("host='localhost' dbname='chat_db' user='postgres' password='admin'")
 mycursor = connection.cursor()
-def insert_client():
-    """
-    insert client into database
-    """
-    sql = "INSERT INTO movies(id,title, geners) VALUES ('%s', '%s', '%s' );" % (row[0], row[1], row[2])
+socketio = SocketIO(app)
+
+
+def insert_client(user,password):
+    """    insert client into database    """
+    sql = "INSERT INTO clients(UserName,Password, CreateDate) VALUES ('%s', '%s', '%s' );" % (user, password, datetime.now())
     try:
-        # Execute the SQL command
         mycursor.execute(sql)
-        # Commit your changes in the database
         connection.commit()
     except:
-        # Rollback in case there is any error
         connection.rollback()
+
+def insert_message(user,message):
+    sql = "INSERT INTO messages(UserName,Messages, CreateDate) VALUES ('%s', '%s', '%s' );" % (user, message, datetime.now())
+    try:
+        mycursor.execute(sql)
+        connection.commit()
+    except:
+        connection.rollback()
+
+def get_client(user):
+    sql = "SELECT UserName, Password FROM clients c WHERE c.UserName='%s'" % (user)
+    mycursor.execute(sql)
+    return mycursor.fetchall()
+
+def get_message():
+    sql = "SELECT UserName, Messages FROM messages "
+    mycursor.execute(sql)
+    return mycursor.fetchall()
+
 @app.route('/')
-def sessions():
-	return render_template('login.html')
-    #return redirect(url_for('login'))
+def index():
+	return redirect(url_for('login'))
 
-@app.route('/login')
+
+@app.route('/login',methods=["POST","GET"])
 def login():
-	#return redirect(url_for('/'))
-	return render_template('login.html')
+    if "user" in session:
+        return redirect('/chat')
+    if request.method=="POST":
+        username=request.form["username"]
+        password=request.form["password"]
+        client=get_client(username)
+        cl=client[0]
+        if cl[1] == password or "user" in session:
+            session['user'] = username
+            return redirect('/chat')
+    return render_template('login.html')
 
-@app.route('/register')
+
+@app.route('/register',methods=["POST","GET"])
 def register():
-	return render_template('register.html')
+    if "user" in session:
+        return redirect('/chat')
+    if request.method=="POST":
+        username=request.form["username"]
+        password=request.form["password"]
+        insert_client(username,password)
+        return redirect('/login')
+    return render_template('register.html')
 
 
+@socketio.on('message')
+def handleMessage(usr,msg): 
+    print(msg)
+    insert_message(session["user"],msg)
+    send(msg, broadcast=True)
 
-@socketio.on('my event')
-def handle_my_custom_event(json, methods=['GET', 'POST']):
-    print('received my event: ' + str(json))
-    socketio.emit('my response', json, callback=messageReceived)
+
+@app.route('/chat')
+def chat():
+    return render_template('index.html',user=session["user"],messages=get_message())
+
+@app.route('/logout')
+def logout():
+    session.pop("user")
+    return redirect('/login')
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
